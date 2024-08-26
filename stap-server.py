@@ -733,7 +733,9 @@ class STAPHandler(socketserver.BaseRequestHandler):
                     break
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
+    def __init__(self, hostandport, handler):
+        super().__init__(hostandport, handler)
+        self.daemon_threads = True
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -767,7 +769,6 @@ if __name__ == "__main__":
         server_thread.daemon = True
         server_thread.start()
 
-        #server.serve_forever()
         text = input('Press enter to exit the main loop...')
         server.shutdown()
         Logger.info('Server shutdown has been called.')
