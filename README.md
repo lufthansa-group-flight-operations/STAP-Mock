@@ -57,7 +57,6 @@ A few cases are not clearly stated in the specification, therefore specific impl
 # Features and Limitations
 - Only integer channel identifiers are supported.
 - No generic parameters are supported.
-- Exit by pressing "Enter". The process will freeze for as long as at least one client connection is active (known bug).
 - Support for the CRC32 mode.
 - Support for the backspace key.
 - Hex values of the form 0xFFFF are accepted as well, although the standard does not define them.
