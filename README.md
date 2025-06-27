@@ -66,7 +66,6 @@ The ARINC 429 words can be modified per configuration using the ```sample_data``
 # Features and Limitations of the Basic STAP Server
 - Only integer channel identifiers are supported.
 - No generic parameters are supported.
-- Exit by pressing "Enter". The process will freeze for as long as at least one client connection is active (known bug).
 - Support for the CRC32 mode.
 - Support for the backspace key.
 - Hex values of the form 0xFFFF are accepted as well, although the standard does not define them.
