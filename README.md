@@ -7,7 +7,20 @@ The program implements most of the commands as defined in the ARINC 834 Suppleme
 # Usage
 ```$ python stap-server.py [configuration-filepath]```
 
-# Configuration
+A derivated version has been added, capable of playing back avionic data recordings:
+
+```$ python stap-server-player.py in=<file> [skip=<minutes>] [host=<host>] [port=<port>]```
+
+Where:
+
+- ```in=``` the input file path with recorded data (.gz or .xml), required
+- ```skip=``` an optional number of minutes to skip in the playback (integer value)
+- ```host=``` an optional bind address for the STAP server (defaults to localhost)
+- ```port=``` an optional bind port for the STAP server (defaults to 50600, integer value)
+
+For details on the recording format, see below.
+
+# Configuration of the Basic STAP Server
 The optional configuration file shall be of a JSON-Object format, reflecting the structure of the ```GLOBAL_CONFIG``` variable. It consists of basic settings of the server, simulated equipment and simulated data. The external file's contents will be merged with the default settings, which means you only need to define the parameters that you wish to change.
 
 | Parameter | Default Value | Description |
@@ -25,7 +38,7 @@ The optional configuration file shall be of a JSON-Object format, reflecting the
 | equipment | see below | Simulated equipment. |
 | sample_data | see below | Simulated data. |
 
-# Simulated Equipment
+# Simulated Equipment of the Basic STAP Server
 The program simulates at least one of each channel types: ARINC 429 receiver, ARINC 429 transmitter, ARINC 717 receiver and discrete lines. They can be specified in a complex structure (see ```GLOBAL_CONFIG``` variable in the code). Default equipment is specified as follows:
 | Channel ID | Equipment Type | Parameters |
 |------------|----------------|------------|
@@ -43,18 +56,14 @@ The program simulates at least one of each channel types: ARINC 429 receiver, AR
 | 33 | Discrete Output | Owned (reserved by the current client). |
 | 34 | Discrete Output | Locked (reserved by another client). |
 
-# Simulated Data
+# Simulated Data of the Basic STAP Server
 ARINC 429 words as provided in the examples of the ARINC 429 Part 1 specification (Table 6-25 for BCD and Table 6-27 for BNR) are generated as soon as subscribed to by the client, no matter what ARINC 429 receiver is used.
 ARINC 717 words are generated as soon as subscribed by the client, no matter what ARINC 717 receiver, subframe or word no. are used. Always a fixed value of 0x0fff.
 Discrete line updates are generated as soon as subscribed by the client, no matter what Discrete Input is used. Always a fixed high state (1).
 
 The ARINC 429 words can be modified per configuration using the ```sample_data```section. The structure is a dictionary of labels as keys and data as values. When providing the data in a configuration file, the keys must be denoted as string representation of a decimal value (please note, normally labels are noted octally), the data must be denoted as integers in their decimal form (please note, normally data is noted hexadecimally).
 
-# Error Codes
-As error codes are not specified by the standard, they are specific to this specific implementation of the STAP protocol. Please treat them as a good example, but don't relay on their values when talking to other implementations.
-A few cases are not clearly stated in the specification, therefore specific implementations may differ, when it comes to that. This statement is valid for reporting an error in case a client subscribes a parameter or removes a subscription that is already (or was not) subscribed. While it is a clear error in simple cases, it gets confusing when mixing it with the ```all``` keyword (for all labels, all subframes or all words). This implementation accepts any potential conflicts if the keyword ```all``` is used. It performs strict verfication in simple cases.
-
-# Features and Limitations
+# Features and Limitations of the Basic STAP Server
 - Only integer channel identifiers are supported.
 - No generic parameters are supported.
 - Exit by pressing "Enter". The process will freeze for as long as at least one client connection is active (known bug).
@@ -62,3 +71,26 @@ A few cases are not clearly stated in the specification, therefore specific impl
 - Support for the backspace key.
 - Hex values of the form 0xFFFF are accepted as well, although the standard does not define them.
 - Requested frequencies of generated data are ignored - everything happens in one common simple loop.
+
+# Recording File Format
+
+The player accepts an XML-formatted file or its gzipped equivalent as an input file.
+The XML file has to be formatted as follows:
+
+```
+<RawAvionicData ...>
+    <DataItem Type="Stap" TimeStamp="ISO 8601 Datetime">
+	    <RawData>raw stap output as recorded elsewhere</RawData>
+    </DataItem>
+	<DataItem ...>
+	...
+	</DataItem>
+</RawAvionicData>
+```
+
+ARINC 429 data words are supported at the moment only.
+
+# Error Codes
+As error codes are not specified by the standard, they are specific to this specific implementation of the STAP protocol. Please treat them as a good example, but don't relay on their values when talking to other implementations.
+A few cases are not clearly stated in the specification, therefore specific implementations may differ, when it comes to that. This statement is valid for reporting an error in case a client subscribes a parameter or removes a subscription that is already (or was not) subscribed. While it is a clear error in simple cases, it gets confusing when mixing it with the ```all``` keyword (for all labels, all subframes or all words). This implementation accepts any potential conflicts if the keyword ```all``` is used. It performs strict verfication in simple cases.
+
